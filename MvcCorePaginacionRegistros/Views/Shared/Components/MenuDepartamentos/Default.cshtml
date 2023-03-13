@@ -1,0 +1,20 @@
+﻿@model List<Departamento>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Dropdown
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    @foreach (Departamento dept in Model)
+                    {
+                        <li><a class="dropdown-item" asp-controller="Departamento" asp-action="Details" asp-route-deptno="@dept.Dept_no">@dept.Dnombre</a></li>
+                    }
+                </ul>
+            </li>
+
+        </div>
+    </div>
+</nav>
