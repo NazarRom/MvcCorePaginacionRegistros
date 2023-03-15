@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MvcCorePaginacionRegistros.Data;
 using MvcCorePaginacionRegistros.Models;
+using System.Data;
 #region 
 
 //create view v_departamentos_individual
@@ -46,10 +47,38 @@ using MvcCorePaginacionRegistros.Models;
 //as
 //select* from
 //(select cast(ROW_NUMBER() over(order by apellido) as int) as posicion,
-//EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO
+//EMP_NO, APELLIDO, OFICIO, FECHA_ALT, SALARIO, DEPT_NO
 // from EMP
 //where OFICIO = @oficio) as query
 //where query.posicion >= @posicion and query.posicion<(@posicion + 3)
+
+
+
+//con regitros para devolver
+//alter procedure sp_grupo_empleados_oficio
+//(@oficio nvarchar(50) , @posicion int, @numeroregistros int out)
+//as
+//select @numeroregistros = count(EMP_NO) from EMP WHERE OFICIO = @oficio
+//                                        select EMP_NO, APELLIDO, OFICIO,FECHA_ALT, SALARIO, DEPT_NO from
+//                                        (select cast(ROW_NUMBER() over(order by apellido) as int) as posicion,
+//EMP_NO, APELLIDO, OFICIO,FECHA_ALT, SALARIO, DEPT_NO
+// from EMP
+//where OFICIO = @oficio) as query
+//where query.posicion >= @posicion and query.posicion<(@posicion + 3)
+
+
+
+//procedure con registros lo que yo quiera
+//alter procedure sp_grupo_empleados_oficio
+//(@oficio nvarchar(50) , @posicion int,@registros int, @numeroregistros int out)
+//as
+//select @numeroregistros = count(EMP_NO) from EMP WHERE OFICIO = @oficio
+//                                        select EMP_NO, APELLIDO, OFICIO,FECHA_ALT, SALARIO, DEPT_NO from
+//                                        (select cast(ROW_NUMBER() over(order by apellido) as int) as posicion,
+//EMP_NO, APELLIDO, OFICIO,FECHA_ALT, SALARIO, DEPT_NO
+// from EMP
+//where OFICIO = @oficio) as query
+//where query.posicion >= @posicion and query.posicion<(@posicion + @registros)
 #endregion
 namespace MvcCorePaginacionRegistros.Repositories
 {
@@ -77,6 +106,7 @@ namespace MvcCorePaginacionRegistros.Repositories
         {
             return this.context.VistaDepartamentos.Count();
         }
+
         public int GetNumeroRegistrosEmpleados()
         {
             return this.context.Empleados.Count();
@@ -112,13 +142,22 @@ namespace MvcCorePaginacionRegistros.Repositories
             return await consulta.ToListAsync();
         }
 
-        public async Task<List<Empleado>> GetGrupoEmpleadoOficio(string oficio, int posicion)
+        public async Task<ModelPaginarEmpleados> GetGrupoEmpleadoOficio(string oficio, int posicion, int registr)
         {
-            string sql = "sp_grupo_empleados_oficio @oficio, @posicion";
+            string sql = "sp_grupo_empleados_oficio @oficio, @posicion,@registros, @numeroregistros out";
+            SqlParameter pamregistro = new SqlParameter("@numeroregistros", -1);
+            pamregistro.Direction = ParameterDirection.Output;
             SqlParameter pamposicion = new SqlParameter("@posicion", posicion);
+            SqlParameter pamregistr = new SqlParameter("@registros", registr);
             SqlParameter pamoficio = new SqlParameter("@oficio", oficio);
-            var consulta = this.context.Empleados.FromSqlRaw(sql, pamoficio, pamposicion);
-            return await consulta.ToListAsync();
+            var consulta = this.context.Empleados.FromSqlRaw(sql, pamoficio, pamposicion, pamregistr, pamregistro);
+            List<Empleado> empleados = await consulta.ToListAsync();
+            int registros = (int)pamregistro.Value;
+            return new ModelPaginarEmpleados
+            {
+                NumeroRegistros = registros,
+                Empleados = empleados
+            };
 
         }
 

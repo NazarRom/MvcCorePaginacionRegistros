@@ -1,0 +1,75 @@
+﻿@model List<Empleado>
+
+@{
+
+    int numeroregistros = 0;
+    int numeropagina = 1;
+    int registr = 0;
+    string oficio = "";
+    //vamos a recibir siempre el numero de registros?
+    if (ViewData["REGISTROS"] != null)
+    {
+        registr = (int)ViewData["REGISTR"];
+        numeroregistros = (int)ViewData["REGISTROS"];
+        oficio = ViewData["OFICIO"].ToString();
+    }
+}
+ <form method="post">
+        <label>Oficio</label>
+        <input type="text" name="oficio" class="form-control" required/>
+        <label>Numero de registrosa</label>
+        <input type="text" name="registr" class="form-control" required />
+        <button class="btn btn-warning">Enviar</button>
+    </form>
+
+
+@if (Model != null)
+{
+    //dibujamos la paginacion
+    <ul class="list-group list-group-horizontal">
+    @for (int i = 1; i <= numeroregistros; i += registr)
+    {
+        <li class="list-group-item list-group-item-danger">
+            <a asp-controller="Paginacion" asp-action="PaginarEmpleadoOficios" class="btn btn-info" asp-route-posicion="@i" asp-route-oficio="@oficio" asp-route-registr="@registr">@numeropagina</a>
+        </li>
+        numeropagina += 1;
+    }
+</ul>
+
+<table class="table table-info">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>APELLIDO</th>
+            <th>OFICIO</th>
+            <th>FECHA</th>
+            <th>SALARIO</th>
+            <th>IDDEPARTAMENTO</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Emp_no)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Apellido)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Oficio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fecha_Alt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Salario)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dept_no)
+        </tr>
+}
+    </tbody>
+</table>
+
+}

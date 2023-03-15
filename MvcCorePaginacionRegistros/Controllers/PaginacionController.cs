@@ -16,21 +16,36 @@ namespace MvcCorePaginacionRegistros.Controllers
         {
             return View();
         }
-        public IActionResult PaginarEmpleadoOficio(int? posicion)
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> PaginarEmpleadoOficio(string oficio, int? posicion)
+       
+        public async Task<IActionResult> PaginarEmpleadoOficios(string oficio, int? posicion, int registr)
         {
             if (posicion == null)
             {
                 posicion = 1;
+                return View();
             }
+            else
+            {
+                ModelPaginarEmpleados model = await this.repo.GetGrupoEmpleadoOficio(oficio, posicion.Value, registr);
+                List<Empleado> empleados = model.Empleados;
+                int numeroRegistros = this.repo.GetNumeroOficios(oficio);
+                ViewData["REGISTROS"] = numeroRegistros;
+                ViewData["OFICIO"] = oficio;
+                ViewData["REGISTR"] = registr;
+                return View(empleados);
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> PaginarEmpleadoOficios(string oficio, int registr)
+        {
+            //cuando busquemos, desde que posicion lo hacemps?
+            ModelPaginarEmpleados model = await this.repo.GetGrupoEmpleadoOficio(oficio, 1, registr);
+            List<Empleado> empleados = model.Empleados;
             int numeroRegistros = this.repo.GetNumeroOficios(oficio);
             ViewData["REGISTROS"] = numeroRegistros;
             ViewData["OFICIO"] = oficio;
-            List<Empleado> empleados = await this.repo.GetGrupoEmpleadoOficio(oficio, posicion.Value);
+            ViewData["REGISTR"] = registr;
             return View(empleados);
         }
 
