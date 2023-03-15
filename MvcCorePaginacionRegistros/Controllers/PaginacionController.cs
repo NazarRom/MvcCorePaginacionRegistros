@@ -19,6 +19,7 @@ namespace MvcCorePaginacionRegistros.Controllers
        
         public async Task<IActionResult> PaginarEmpleadoOficios(string oficio, int? posicion, int registr)
         {
+            //COMMENT
             if (posicion == null)
             {
                 posicion = 1;
